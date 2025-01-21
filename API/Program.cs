@@ -1,3 +1,6 @@
+using System.Reflection;
+using API.Helpers;
+using AutoMapper;
 using Core.Interfaces;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -6,15 +9,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Injecting services/dependencies to the container.
 
-// Product Repositories
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
-// Controllers
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddAutoMapper(typeof(MappingProfiles));
 builder.Services.AddControllers();
-// Database (SQLite)
+builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<StoreContext>(x => x.UseSqlite(connectionString));
-// OpenAPI
-builder.Services.AddOpenApi();
+
 
 
 
@@ -47,6 +50,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.UseAuthorization();
 

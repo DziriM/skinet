@@ -10,7 +10,7 @@ public class ProductRepository : IProductRepository
 
     public ProductRepository(StoreContext context)
     {
-        _context = context;
+        _context = context; 
     }
 
     public async Task<Product> GetProductByIdAsync(int id)
