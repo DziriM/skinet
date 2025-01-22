@@ -1,7 +1,7 @@
-using System.Reflection;
+using API.Extensions;
 using API.Helpers;
+using API.Middleware;
 using AutoMapper;
-using Core.Interfaces;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,51 +9,35 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Injecting services/dependencies to the container.
 
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddAutoMapper(typeof(MappingProfiles));
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
+
+// Db Connection (using SQLite as DB)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<StoreContext>(x => x.UseSqlite(connectionString));
 
-
-
+// Extension Static method to extend our service injection
+builder.Services.AddApplicationServices();
+builder.Services.AddSwaggerService();
 
 var app = builder.Build();
 
-// We are applying migration to the db at the start of the application and logging if there is any error 
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var loggerFactory = services.GetRequiredService<ILoggerFactory>();
-
-    try
-    {
-        var context = services.GetRequiredService<StoreContext>();
-        await context.Database.MigrateAsync();
-        await StoreContextSeed.SeedAsync(context, loggerFactory);
-    }
-    catch (Exception ex)
-    {
-        var logger = loggerFactory.CreateLogger<Program>();
-        logger.LogError(ex, "An error occurred during migration");
-    }
-}
-
+// Call this first to apply migrations before any middleware
+await app.ApplyMigrationsAsync();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+app.UseMiddleware<ExceptionMiddleware>();
+
+app.UseStatusCodePagesWithReExecute("/error/{0}");
 
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
 app.UseAuthorization();
+
+app.UseSwaggerDocumentation();
 
 app.MapControllers();
 
