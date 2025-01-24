@@ -2,16 +2,12 @@ using System.Diagnostics;
 
 namespace API.Errors;
 
-public class ApiResponse
+public class ApiErrorResponse(int statusCode, string message, string? details)
 {
-    public ApiResponse(int statusCode, string message = null)
-    {
-        StatusCode = statusCode;
-        Message = message ?? GetDefaultMessageForStatusCode(statusCode);
-    }
-    public int StatusCode { get; set; }
-    
-    public string? Message { get; set; }
+
+    public int StatusCode { get; set; } = statusCode;
+    public string Message { get; set; } = message;
+    public string? Details { get; set; } = details;
     
     private string? GetDefaultMessageForStatusCode(int statusCode)
     {

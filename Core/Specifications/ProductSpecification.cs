@@ -10,6 +10,7 @@ public class ProductSpecification : BaseSpecification<Product>
         (specParams.Types.Count == 0 || specParams.Types.Contains(x.Type))
     )
     {
+        
         // Paging
         ApplyPaging(specParams.PageSize * (specParams.PageIndex -1), specParams.PageSize);
         
