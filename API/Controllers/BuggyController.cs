@@ -15,25 +15,25 @@ public class BuggyController(StoreContext context) : BaseApiController
     {
         return Unauthorized();
     }
-    
+
     [HttpGet("badrequest")]
     public IActionResult GetBadRequest()
     {
         return BadRequest();
     }
-    
+
     [HttpGet("notfound")]
     public IActionResult GetNotFound()
     {
         return NotFound();
     }
-    
+
     [HttpGet("internalerror")]
     public IActionResult GetInternalError()
     {
         throw new Exception("This is a test exception");
     }
-    
+
     [HttpPost("validationerror")]
     public IActionResult GetValidationError(CreateProductDTto productDto)
     {
