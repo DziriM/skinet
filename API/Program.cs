@@ -1,6 +1,7 @@
 using API.Extensions;
 using API.Middleware;
 using AutoMapper;
+using Core.Entities;
 using Core.Interfaces;
 using Infrastructure;
 using Infrastructure.Data;
@@ -31,6 +32,11 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(config =>
 });
 builder.Services.AddSingleton<ICartService, CartService>();
 
+// Identity
+builder.Services.AddAuthorization();
+builder.Services.AddIdentityApiEndpoints<AppUser>()
+    .AddEntityFrameworkStores<StoreContext>();
+
 
 
 var app = builder.Build();
@@ -45,6 +51,7 @@ app.UseMiddleware<ExceptionMiddleware>();
 app.UseCors(x => x
     .AllowAnyHeader()
     .AllowAnyMethod()
+    .AllowCredentials()
     .WithOrigins("http://localhost:4200", "https://localhost:4200"));
 
 app.UseStatusCodePagesWithReExecute("/error/{0}");
@@ -58,5 +65,7 @@ app.UseAuthorization();
 app.UseSwaggerDocumentation();
 
 app.MapControllers();
+
+app.MapGroup("api").MapIdentityApi<AppUser>();
 
 app.Run();
