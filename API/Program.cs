@@ -18,11 +18,17 @@ builder.Services.AddControllers();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<StoreContext>(x => x.UseSqlServer(connectionString));
 
-// Extension Static method to extend our service injection
+// Product and Repository
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+// Swagger
 builder.Services.AddSwaggerService();
+
+// CORS
 builder.Services.AddCors();
+
+// Database
 builder.Services.AddSingleton<IConnectionMultiplexer>(config => 
 {
     var connString = builder.Configuration.GetConnectionString("Redis") ?? throw new Exception("Cannot get Redis connection string");
@@ -30,6 +36,8 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(config =>
 
     return ConnectionMultiplexer.Connect(configuration);
 });
+
+// Cart
 builder.Services.AddSingleton<ICartService, CartService>();
 
 // Identity
@@ -37,6 +45,8 @@ builder.Services.AddAuthorization();
 builder.Services.AddIdentityApiEndpoints<AppUser>()
     .AddEntityFrameworkStores<StoreContext>();
 
+// Payments
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 
 var app = builder.Build();
