@@ -11,24 +11,16 @@ using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// --------------------------------------- Dependencies Injected --------------------------------------------------- //
+
 // Injecting services/dependencies to the container.
 builder.Services.AddControllers();
 
-// Db Connection (using SQLite as DB)
+// SQL Server Database
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<StoreContext>(x => x.UseSqlServer(connectionString));
 
-// Product and Repository
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-
-// Swagger
-builder.Services.AddSwaggerService();
-
-// CORS
-builder.Services.AddCors();
-
-// Database
+// Redis Database
 builder.Services.AddSingleton<IConnectionMultiplexer>(config => 
 {
     var connString = builder.Configuration.GetConnectionString("Redis") ?? throw new Exception("Cannot get Redis connection string");
@@ -37,23 +29,39 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(config =>
     return ConnectionMultiplexer.Connect(configuration);
 });
 
-// Cart
-builder.Services.AddSingleton<ICartService, CartService>();
+// Generic Repository
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+// UnitOfWork
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Identity
 builder.Services.AddAuthorization();
 builder.Services.AddIdentityApiEndpoints<AppUser>()
     .AddEntityFrameworkStores<StoreContext>();
 
+// Product
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
+// Cart
+builder.Services.AddSingleton<ICartService, CartService>();
+
 // Payments
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 
+// Swagger
+builder.Services.AddSwaggerService();
 
+// CORS
+builder.Services.AddCors();
+
+// Building the App
 var app = builder.Build();
 
 // Call this first to apply migrations before any middleware
 await app.ApplyMigrationsAsync();
 
+// --------------------------------------- Middlewares --------------------------------------------------- //
 // Configure the HTTP request pipeline.
 app.UseMiddleware<ExceptionMiddleware>();
 
