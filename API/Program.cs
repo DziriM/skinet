@@ -1,5 +1,6 @@
 using API.Extensions;
 using API.Middleware;
+using API.SignalR;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
@@ -49,6 +50,9 @@ builder.Services.AddSingleton<ICartService, CartService>();
 // Payments
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 
+// SignalR
+builder.Services.AddSignalR();
+
 // Swagger
 builder.Services.AddSwaggerService();
 
@@ -72,18 +76,22 @@ app.UseCors(x => x
     .AllowCredentials()
     .WithOrigins("http://localhost:4200", "https://localhost:4200"));
 
+app.UseAuthentication();
+
+app.UseAuthorization();
+
 app.UseStatusCodePagesWithReExecute("/error/{0}");
 
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
-app.UseAuthorization();
-
 app.UseSwaggerDocumentation();
 
 app.MapControllers();
 
 app.MapGroup("api").MapIdentityApi<AppUser>();
+
+app.MapHub<NotificationHub>("/hub/notifications");
 
 app.Run();
