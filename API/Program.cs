@@ -77,21 +77,18 @@ app.UseCors(x => x
     .WithOrigins("http://localhost:4200", "https://localhost:4200"));
 
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 app.UseStatusCodePagesWithReExecute("/error/{0}");
 
 app.UseHttpsRedirection();
 
+app.UseDefaultFiles();
 app.UseStaticFiles();
 
-app.UseSwaggerDocumentation();
-
 app.MapControllers();
-
-app.MapGroup("api").MapIdentityApi<AppUser>();
-
+app.MapGroup("api").MapIdentityApi<AppUser>(); // api/login
 app.MapHub<NotificationHub>("/hub/notifications");
+app.MapFallbackToController("Index", "Fallback");
 
 app.Run();
