@@ -3,7 +3,7 @@ import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Cart, CartItem } from '../../shared/models/cart';
 import { Product } from '../../shared/models/product';
-import { map } from 'rxjs';
+import { firstValueFrom, map, tap } from 'rxjs';
 import { DeliveryMethod } from '../../shared/models/deliveryMethod';
 
 @Injectable({
@@ -52,12 +52,14 @@ export class CartService {
   }
 
   setCart(cart: Cart) {
-    return this.http.post<Cart>(this.baseUrl + 'cart', cart).subscribe({
-      next: (cart) => this.cart.set(cart),
-    });
+    return this.http.post<Cart>(this.baseUrl + 'cart', cart).pipe(
+      tap((cart) => {
+        this.cart.set(cart);
+      })
+    );
   }
 
-  addItemToCart(item: CartItem | Product, quantity = 1) {
+  async addItemToCart(item: CartItem | Product, quantity = 1) {
     // Get the cart or Create it
     const cart = this.cart() ?? this.createCart();
 
@@ -70,10 +72,10 @@ export class CartService {
     cart.items = this.addOrUpdateItem(cart.items, item, quantity);
 
     // We set the update state of the cart with the new item or its new quantity
-    this.setCart(cart);
+    await firstValueFrom(this.setCart(cart));
   }
 
-  removeItemFromCart(productId: number, quantity = 1) {
+  async removeItemFromCart(productId: number, quantity = 1) {
     // Get the cart
     const cart = this.cart();
     // Break if no cart found
@@ -92,7 +94,7 @@ export class CartService {
       if (cart.items.length === 0) {
         this.deleteCart();
       } else {
-        this.setCart(cart);
+        await firstValueFrom(this.setCart(cart));
       }
     }
   }
