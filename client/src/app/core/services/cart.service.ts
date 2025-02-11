@@ -3,7 +3,6 @@ import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Cart, CartItem } from '../../shared/models/cart';
 import { Product } from '../../shared/models/product';
-import { nanoid } from 'nanoid';
 import { map } from 'rxjs';
 import { DeliveryMethod } from '../../shared/models/deliveryMethod';
 

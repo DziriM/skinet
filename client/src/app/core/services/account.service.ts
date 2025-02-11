@@ -11,8 +11,8 @@ import { SignalrService } from './signalr.service';
 export class AccountService {
   baseUrl = environment.apiUrl;
   private http = inject(HttpClient);
-  currentUser = signal<User | null>(null);
   private signalrService = inject(SignalrService);
+  currentUser = signal<User | null>(null);
 
   login(values: any) {
     let params = new HttpParams();
