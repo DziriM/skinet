@@ -6,6 +6,7 @@ export interface CartType {
   deliveryMethodId?: number;
   paymentIntentId?: string;
   clientSecret?: string;
+  coupon?: Coupon;
 }
 
 export interface CartItem {
@@ -24,4 +25,13 @@ export class Cart implements CartType {
   deliveryMethodId?: number;
   paymentIntentId?: string;
   clientSecret?: string;
+  coupon?: Coupon;
+}
+
+export interface Coupon {
+  name: string;
+  amountOff?: number;
+  percentOff?: number;
+  promotionCode: string;
+  couponId: string;
 }

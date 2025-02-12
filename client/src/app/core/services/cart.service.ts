@@ -1,7 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { Cart, CartItem } from '../../shared/models/cart';
+import { Cart, CartItem, Coupon } from '../../shared/models/cart';
 import { Product } from '../../shared/models/product';
 import { firstValueFrom, map, tap } from 'rxjs';
 import { DeliveryMethod } from '../../shared/models/deliveryMethod';
@@ -24,7 +24,6 @@ export class CartService {
 
   totals = computed(() => {
     const cart = this.cart();
-
     const delivery = this.selectedDelivery();
 
     if (!cart) return null;
@@ -32,15 +31,36 @@ export class CartService {
       (sum, item) => sum + item.price * item.quantity,
       0
     );
+
+    let discountValue = 0;
+
+    console.log(discountValue);
+
+    if (cart.coupon) {
+      if (cart.coupon.amountOff) {
+        discountValue = cart.coupon.amountOff;
+      } else if (cart.coupon.percentOff) {
+        discountValue = subtotal * (cart.coupon.percentOff / 100);
+      }
+    }
+
+    console.log(discountValue);
+
     const shipping = delivery ? delivery.price : 0;
-    const discount = 0;
+
+    const total = subtotal + shipping - discountValue;
+
     return {
-      subtotal,
-      shipping,
-      discount,
-      total: subtotal + shipping - discount,
+      subtotal: subtotal,
+      shipping: shipping,
+      discount: discountValue,
+      total: total,
     };
   });
+
+  applyDiscount(code: string) {
+    return this.http.get<Coupon>(this.baseUrl + 'coupons/' + code);
+  }
 
   getCart(id: string) {
     return this.http.get<Cart>(this.baseUrl + 'cart?id=' + id).pipe(

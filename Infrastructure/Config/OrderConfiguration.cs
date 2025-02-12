@@ -20,9 +20,6 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             o => (OrderStatus)Enum.Parse(typeof(OrderStatus), o)
         );
         
-        // Configuration of the decimal
-        builder.Property(x => x.SubTotal).HasColumnType("decimal(18, 2)");
-        
         // One Order can have MANY OrderItems - If we delete the Order, it will delete the OrderItems in that Order
         builder.HasMany(x => x.OrderItems).WithOne().OnDelete(DeleteBehavior.Cascade);
         
@@ -31,5 +28,12 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             d => d.ToUniversalTime(),
             d => DateTime.SpecifyKind(d, DateTimeKind.Utc)
         );
+
+        // Configuration of the Subtotal
+        builder.Property(x => x.SubTotal).HasColumnType("decimal(18, 2)");
+
+        // Configuration of the Discount
+        builder.Property(x => x.Discount).HasColumnType("decimal(18,2)");
+
     }
 }

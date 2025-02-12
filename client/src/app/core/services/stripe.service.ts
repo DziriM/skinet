@@ -118,6 +118,9 @@ export class StripeService {
     if (result.error) throw new Error(result.error.message);
 
     const clientSecret = this.cartService.cart()?.clientSecret;
+
+    // console.log('ClientSecret is :' + clientSecret);
+
     if (stripe && clientSecret) {
       return await stripe.confirmPayment({
         clientSecret: clientSecret,
@@ -133,10 +136,17 @@ export class StripeService {
 
   createOrUpdatePaymentIntent() {
     const cart = this.cartService.cart();
+
+    const hasClientSecret = !!cart?.clientSecret; // !! trasnform the type into boolean
+
     if (!cart) throw new Error('Problem with cart');
+
     return this.http.post<Cart>(this.baseUrl + 'payments/' + cart.id, {}).pipe(
-      map(async (cart) => {
-        await firstValueFrom(this.cartService.setCart(cart));
+      map((cart) => {
+        if (!hasClientSecret) {
+          this.cartService.setCart(cart);
+          return cart;
+        }
         return cart;
       })
     );
