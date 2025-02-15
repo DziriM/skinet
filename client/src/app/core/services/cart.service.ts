@@ -34,7 +34,7 @@ export class CartService {
 
     let discountValue = 0;
 
-    console.log(discountValue);
+    //console.log(discountValue);
 
     if (cart.coupon) {
       if (cart.coupon.amountOff) {
@@ -44,7 +44,7 @@ export class CartService {
       }
     }
 
-    console.log(discountValue);
+    //console.log(discountValue);
 
     const shipping = delivery ? delivery.price : 0;
 
