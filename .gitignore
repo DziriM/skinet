@@ -3,3 +3,4 @@ obj
 appsettings.json
 *.db
 .idea/*
+HOW-TO and ANALYSIS.md
